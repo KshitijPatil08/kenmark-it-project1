@@ -2,12 +2,13 @@
 // MongoDB database with employee attendance tracking
 
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider = "prisma-client-js"
+  // Remove engineType line entirely for MongoDB
 }
 
 datasource db {
   provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // Employee model - stores basic employee information
