@@ -1,5 +1,8 @@
 import { config } from "dotenv";
-config({ path: ".env.local" });
+// Only load from .env.local if NOT on Vercel/CI
+if (!process.env.VERCEL) {
+  config({ path: ".env.local" });
+}
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
