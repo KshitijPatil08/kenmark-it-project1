@@ -1,0 +1,66 @@
+// Prisma schema for Leave & Productivity Analyzer
+// MongoDB database with employee attendance tracking
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+// Employee model - stores basic employee information
+model Employee {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId      String            @unique
+  name            String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  attendances     Attendance[]
+  monthlySummaries MonthlySummary[]
+  
+  @@map("employees")
+}
+
+// Attendance model - daily attendance records
+model Attendance {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId      String    @db.ObjectId
+  date            DateTime
+  inTime          String?   // Format: "HH:MM" (e.g., "10:00")
+  outTime         String?   // Format: "HH:MM" (e.g., "18:30")
+  workedHours     Float     @default(0)
+  isLeave         Boolean   @default(false)
+  dayType         String    // "weekday", "saturday", "sunday"
+  expectedHours   Float     @default(0)
+  createdAt       DateTime  @default(now())
+  
+  // Relations
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@unique([employeeId, date])
+  @@map("attendances")
+}
+
+// MonthlySummary model - aggregated monthly statistics
+model MonthlySummary {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId            String    @db.ObjectId
+  month                 Int       // 1-12
+  year                  Int
+  expectedHours         Float
+  actualHours           Float
+  leavesUsed            Int
+  productivityPercentage Float
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  employee              Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@unique([employeeId, month, year])
+  @@map("monthly_summaries")
+}
